@@ -41,6 +41,10 @@ $app->singleton(
     App\Exceptions\Handler::class
 );
 
+$app->singleton('RequestId', function ($app) {
+    return md5(uniqid('', true));
+});
+
 /*
 |--------------------------------------------------------------------------
 | Return The Application
