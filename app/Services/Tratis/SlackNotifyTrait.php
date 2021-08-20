@@ -10,12 +10,10 @@ use GuzzleHttp\Exception\RequestException;
 trait SlackNotifyTrait
 {
     /**
-     * 發送slack通知
-     * @param int $companyId
-     * @param int $storeId
+     * send slack notify
      * @param array $opitons [
-     *          "title": "xxxx" 通知標題
-     *          "message": "xxxx" 通知內容
+     *          "title": "xxxx" 
+     *          "message": "xxxx" 
      *      ]
      *
      */
