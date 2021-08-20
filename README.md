@@ -10,7 +10,7 @@
 ## Features
 * Controller-Service-Repository-Model pattern
 * JWT & refresh token
-* Formatted response & exception response
+* Formatted response & exception response
 * Resource & Exception Module
 * Request_id for tracking user action history
 * Use sentry for error tracking
