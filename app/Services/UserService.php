@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use DB;
 use App\Repositories\UserRepository;
 use App\Exceptions\UserException;
 
@@ -49,6 +50,95 @@ class UserService
             auth('api')->logout();
         } catch (\Exception $e) {
             $this->exception->error(20002);
+        }
+    }
+
+    /**
+     * get user list
+     * @param array $data
+     * @return object
+     */
+    public function getUserList(array $data)
+    {
+        $filter = [
+            'limit' => $data['limit'] ?? env('PAGE_LIMIT')
+        ];
+        return $this->userRepo->listByFilter($filter);
+    }
+
+    /**
+     * get user
+     * @param int $userId
+     * @return object
+     */
+    public function getUser(int $userId)
+    {
+        $filter = [
+            'id'    => $userId
+        ];
+        return $this->userRepo->listByFilter($filter);
+    }
+
+    /**
+     * create user
+     * @param array $data
+     * @return object
+     */
+    public function createUser(array $data)
+    {
+        $userData = [
+            'account'  => $data['account'],
+            'password' => $data['account'],
+            'name'     => $data['name'],
+            'phone'    => $data['phone'],
+            'email'    => $data['email'],
+        ];
+
+        DB::beginTransaction();
+        try {
+            $this->userRepo->create($userData);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->exception->error(20003, $e->getMessage());
+        }
+    }
+
+    /**
+     * update user by id
+     * @param int $userId
+     */
+    public function updateUserById(array $data)
+    {
+        $userData = [
+            'name'     => $data['name'],
+            'phone'    => $data['phone'],
+            'email'    => $data['email'],
+        ];
+
+        DB::beginTransaction();
+        try {
+            $this->userRepo->updateById($data['id'], $userData);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->exception->error(20004, $e->getMessage());
+        }
+    }
+
+    /**
+     * delete user by id
+     * @param int $id
+     */
+    public function deleteUserById(int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $this->userRepo->deleteById($id);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->exception->error(20004, $e->getMessage());
         }
     }
 }

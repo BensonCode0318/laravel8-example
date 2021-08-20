@@ -10,7 +10,7 @@ use Throwable;
  *
  * @package App\Exceptions
  */
-class AuthException extends BaseException
+class UserException extends BaseException
 {
     private $errorConfig = [
         '20001' => [
@@ -21,6 +21,21 @@ class AuthException extends BaseException
         '20002' => [
             'type'    => ExceptionConstant::FAILURE,
             'message' => '登出失敗',
+            'sentry'  => false,
+        ],
+        '20003' => [
+            'type'    => ExceptionConstant::FAILURE,
+            'message' => '新增會員失敗',
+            'sentry'  => false,
+        ],
+        '20004' => [
+            'type'    => ExceptionConstant::FAILURE,
+            'message' => '更新會員失敗',
+            'sentry'  => false,
+        ],
+        '20005' => [
+            'type'    => ExceptionConstant::FAILURE,
+            'message' => '刪除會員失敗',
             'sentry'  => false,
         ],
     ];

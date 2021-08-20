@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Services\UserService;
 use App\Exceptions\UserException;
 use App\Http\Resources\BaseJsonResource;
+use App\Http\Resources\GetUserResource;
+use App\Http\Resources\GetUserListCollection;
 
 class UserController extends Controller
 {
@@ -21,25 +23,23 @@ class UserController extends Controller
     }
 
     /**
-     * 取得 員工清單
-     * @param array $request[
-     *      @param string $keyword  搜尋關鍵字
-     *]
+     * get user list
      * @return json
      */
     public function index(Request $request)
     {
+        $inputData    = $request->all();
         $validateRule = [
-            'keyword' => 'nullable | string',
+            'limit' => 'sometimes|int',
         ];
-        $data = $request->all();
-        $this->validateByRule($data, $validateRule);
-        $users = $this->userService->getUsers($data);
-        return new GetUserIndexCollection($users);
+        $this->validateByRule($inputData, $validateRule);
+
+        $users = $this->userService->getUsers($inputData);
+        return new GetUserListCollection($users);
     }
 
     /**
-     * 取得 單一員工資料
+     * get user
      * @param int $userId 員工ID
      *
      * @return json
@@ -47,116 +47,73 @@ class UserController extends Controller
     public function show(int $userId)
     {
         $validateRule = [
-            'userId'    => 'required | int',
+            'user_id'    => 'required|int',
         ];
-        $data['userId'] = $userId;
-        $this->validateByRule($data, $validateRule);
-        $user = $this->userService->getOneUser($userId);
-        return new GetUserIndexResource($user);
+        $this->validateByRule([
+            'user_id' => $userId
+        ], $validateRule);
+
+        $user = $this->userService->getUser($userId);
+        return new GetUserResource($user);
     }
 
+
     /**
-     * 員工登入，以及取得token
-     * @param array $request[
-     *    @param string $user_no 員工編號
-     *    @param string $password 員工密碼
-     *]
-     * @return json
+     * create user
+     * @return BaseJsonResource
      */
-    public function login(Request $request)
+    public function create(Request $request)
     {
+        $inputData    = $request->all();
         $validateRule = [
-            'user_no'    => 'required | string',
-            'password'   => 'required | string',
+            'account'  => 'required|string',
+            'password' => 'required|string',
+            'name'     => 'required|string',
+            'phone'    => 'string|nullable|regex:/^09[0-9]{8}$/',
+            'email'    => 'string|nullable|regex:/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi',
         ];
-        $data  = $request->all();
-        $this->validateByRule($data, $validateRule);
-        $token = $this->userService->login($data);
-        return new PostUserLoginResource($token);
-    }
-
-    /**
-     * 員工登出
-     * @return json
-     */
-    public function logout()
-    {
-        $this->userService->logout();
+        $this->validateByRule($inputData, $validateRule);
+        
+        $this->userService->createUser($inputData);
         return new BaseJsonResource(null);
     }
 
     /**
-     * 建立員工資料
-     * @param array $request[
-     *    @param string $user_no 員工編號
-     *    @param string $password 員工密碼
-     *    @param string $name 員工姓名
-     *    @param string $phone 員工手機
-     *    @param string $notes 員工備註
-     *    @param string $auth 員工權限
-     *]
-     * @return json
-     */
-    public function store(Request $request)
-    {
-        $validateRule = [
-            'user_no'             => 'required | string',
-            'password'            => 'required | string',
-            'name'                => 'required | string',
-            'phone'               => 'string | nullable',
-            'notes'               => 'string | nullable',
-            'permission_ids'      => 'string | nullable',
-        ];
-        $data = $request->all();
-        $this->validateByRule($data, $validateRule);
-        $this->userService->createUser($data);
-        return new BaseJsonResource(null);
-    }
-
-    /**
-     * 建立員工資料
-     * @param int $userId 員工ＩＤ
-     * @param array $request[
-     *    @param string $user_no 員工編號
-     *    @param string $password 員工密碼
-     *    @param string $name 員工姓名
-     *    @param string $phone 員工手機
-     *    @param string $notes 員工備註
-     *    @param string $auth 員工權限
-     *]
-     * @return json
+     * update user
+     * @param int $userId
+     * @return BaseJsonResource
      */
     public function update(Request $request, int $userId)
     {
+        $inputData       = $request->all();
+        $inputData['id'] = $userId;
+
         $validateRule = [
-            'user_no'           => 'required | string',
-            'name'              => 'required | string',
-            'phone'             => 'string | nullable',
-            'notes'             => 'string | nullable',
-            'permission_ids'    => 'string | nullable',
-            'userId'            => 'required | int'
+            'id'    => 'required|integer',
+            'name'  => 'required|string',
+            'phone' => 'string|nullable|regex:/^09[0-9]{8}$/',
+            'email' => 'string|nullable|regex:/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi',
         ];
-        $data = $request->all();
-        $data['userId'] = $userId;
-        $this->validateByRule($data, $validateRule);
-        $this->userService->updateUser($userId, $data);
+        $this->validateByRule($inputData, $validateRule);
+
+        $this->userService->updateUserById($inputData);
         return new BaseJsonResource(null);
     }
 
     /**
-     * 刪除 單一員工
+     * delete user by id
      * @param int $userId 員工ID
      *
-     * @return json
+     * @return BaseJsonResource
      */
     public function delete(int $userId)
     {
+        $inputData['id'] = $userId;
         $validateRule = [
-            'userId'     => 'required | int'
+            'id' => 'required|integer'
         ];
-        $data['userId'] = $userId;
-        $this->validateByRule($data, $validateRule);
-        $this->userService->deleteUser($userId);
+        $this->validateByRule($inputData, $validateRule);
+        $this->userService->deleteUserById($inputData['id']);
         return new BaseJsonResource(null);
     }
 
