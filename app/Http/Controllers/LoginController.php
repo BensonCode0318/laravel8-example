@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use App\Exceptions\UserException;
 use App\Http\Resources\PostLoginResource;
 
 class LoginController extends Controller

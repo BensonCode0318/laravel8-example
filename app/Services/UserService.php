@@ -88,10 +88,10 @@ class UserService
     {
         $userData = [
             'account'  => $data['account'],
-            'password' => $data['account'],
+            'password' => $data['password'],
             'name'     => $data['name'],
-            'phone'    => $data['phone'],
-            'email'    => $data['email'],
+            'phone'    => $data['phone'] ?? null,
+            'email'    => $data['email'] ?? null,
         ];
 
         DB::beginTransaction();
